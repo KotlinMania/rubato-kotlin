@@ -335,7 +335,7 @@ fun requestedTaskWantsAndroid(rawTaskName: String): Boolean {
     val taskName = rawTaskName.substringAfterLast(':')
     if (taskName.contains("AndroidNative")) return false // Kotlin/Native, no SDK
     if (taskName.contains("Android")) return true // direct AGP tasks
-    return taskName in setOf("build", "assemble", "check") // aggregates pull android
+    return taskName in setOf("build", "assemble", "check", "test") // aggregates pull android
 }
 
 if (gradle.startParameter.taskNames.any(::requestedTaskWantsAndroid)) {
@@ -466,7 +466,13 @@ kotlin {
     js {
         configureBenchmarkCompilation()
         browser()
-        nodejs()
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "60s"
+                }
+            }
+        }
     }
 
     // wasmJs is Stable as of Kotlin 2.2; @OptIn may be removable — verify before dropping on wasmWasi.
@@ -474,13 +480,25 @@ kotlin {
     wasmJs {
         configureBenchmarkCompilation()
         browser()
-        nodejs()
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "60s"
+                }
+            }
+        }
     }
 
     @OptIn(ExperimentalWasmDsl::class)
     wasmWasi {
         configureBenchmarkCompilation()
-        nodejs()
+        nodejs {
+            testTask {
+                useMocha {
+                    timeout = "60s"
+                }
+            }
+        }
     }
 
     // Swift Export bridge — Experimental per Kotlin 2.4.0 release notes.
